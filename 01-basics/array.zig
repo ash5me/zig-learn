@@ -63,12 +63,24 @@ fn find_max(numbers: []const i32) i32 {
     return max;
 }
 
+fn count_positive(numbers: []const i32) usize {
+    //check if number is greater than zero, then count. return count
+    var count: usize = 0; // usize - Unsigned integer sized for the target's pointer width; used for Array length, index, count
+    for (numbers) |number| {
+        if (number > 0) {
+            count += 1;
+        }
+    }
+    return count;
+}
+
 pub fn main() void {
-    const numbers = [_]i32{ -8, -3, -12, -5 };
+    const numbers = [_]i32{ -8, 3, 0, 12, -2, 5 };
 
     //print_numbers(numbers[1..4]); // function can accept slice without need to know array's size at comptime. The slices can be different sizes still be accepted by sum()
-    const result = find_max(numbers[1..4]);
-
-    std.debug.print("max : {d}\n", .{result});
+    //const result = find_max(numbers[1..4]);
+    // std.debug.print("max : {d}\n", .{result});
+    const count = count_positive(numbers[1..5]);
+    std.debug.print("number : {d}\n", .{count});
 }
 //++++++++++++++++++++++++ NOTE : [_] means “compiler, figure out the array's length by counting the elements.” +++++++++++++++++++//

@@ -74,13 +74,42 @@ fn count_positive(numbers: []const i32) usize {
     return count;
 }
 
+fn find_min(numbers: []const i32) i32 {
+    var min: i32 = numbers[0];
+    for (numbers) |number| {
+        if (number < min) {
+            min = number;
+        }
+    }
+    return min;
+}
+
+fn find_max_index(numbers: []const i32) usize {
+    // find the max number
+    const max_number: i32 = find_max(numbers);
+    // find the last index of that number, by leaving return statement outside of the loop
+    var last_index: usize = 0;
+    for (numbers, 0..) |number, index| {
+        if (number == max_number) {
+            // store it in an array then retrive the last element in the array
+            last_index = index;
+        }
+    }
+    return last_index;
+}
+
 pub fn main() void {
-    const numbers = [_]i32{ -8, 3, 0, 12, -2, 5 };
+    const numbers = [_]i32{ 5, 12, 7, 12, 3 };
 
     //print_numbers(numbers[1..4]); // function can accept slice without need to know array's size at comptime. The slices can be different sizes still be accepted by sum()
     //const result = find_max(numbers[1..4]);
     // std.debug.print("max : {d}\n", .{result});
-    const count = count_positive(numbers[1..5]);
-    std.debug.print("number : {d}\n", .{count});
+    //
+    // const count = count_positive(numbers[1..5]);
+    //
+    // const result = find_min(numbers[1..4]);
+    // std.debug.print("Minimum number : {d}\n", .{result});
+    const result = find_max_index(numbers[1..4]); // finding max within the given slice and then return its index value of the first maximum
+    std.debug.print("index: {d}\n", .{result});
 }
 //++++++++++++++++++++++++ NOTE : [_] means “compiler, figure out the array's length by counting the elements.” +++++++++++++++++++//

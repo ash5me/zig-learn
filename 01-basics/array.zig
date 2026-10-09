@@ -84,6 +84,20 @@ fn find_min(numbers: []const i32) i32 {
     return min;
 }
 
+//find just the index
+// fn find_max_index(numbers: []const i32) usize {
+//     const max_number = find_max(numbers);
+
+//     for (numbers, 0..) |number, index| {
+//         if (number == max_number) {
+//             return index;
+//         }
+//     }
+
+//     unreachable;
+// }
+
+//find the last index
 fn find_max_index(numbers: []const i32) usize {
     // find the max number
     const max_number: i32 = find_max(numbers);
@@ -97,6 +111,8 @@ fn find_max_index(numbers: []const i32) usize {
     }
     return last_index;
 }
+
+//TODO: find Find all occurrences
 
 pub fn main() void {
     const numbers = [_]i32{ 5, 12, 7, 12, 3 };

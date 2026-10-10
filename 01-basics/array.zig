@@ -112,7 +112,17 @@ fn find_max_index(numbers: []const i32) usize {
     return last_index;
 }
 
-//TODO: find Find all occurrences
+// Count max occurences
+fn count_max_occurrences(numbers: []const i32) usize {
+    const max_number: i32 = find_max(numbers);
+    var count: usize = 0;
+    for (numbers) |number| {
+        if (number == max_number) {
+            count += 1;
+        }
+    }
+    return count;
+}
 
 pub fn main() void {
     const numbers = [_]i32{ 5, 12, 7, 12, 3 };
@@ -125,7 +135,8 @@ pub fn main() void {
     //
     // const result = find_min(numbers[1..4]);
     // std.debug.print("Minimum number : {d}\n", .{result});
-    const result = find_max_index(numbers[1..4]); // finding max within the given slice and then return its index value of the first maximum
-    std.debug.print("index: {d}\n", .{result});
+    // const result = find_max_index(numbers[1..4]); // finding max within the given slice and then return its index value of the first maximum
+    const result = count_max_occurrences(numbers[1..4]);
+    std.debug.print("count: {d}\n", .{result});
 }
 //++++++++++++++++++++++++ NOTE : [_] means “compiler, figure out the array's length by counting the elements.” +++++++++++++++++++//

@@ -105,7 +105,6 @@ fn find_max_index(numbers: []const i32) usize {
     var last_index: usize = 0;
     for (numbers, 0..) |number, index| {
         if (number == max_number) {
-            // store it in an array then retrive the last element in the array
             last_index = index;
         }
     }
@@ -124,6 +123,23 @@ fn count_max_occurrences(numbers: []const i32) usize {
     return count;
 }
 
+fn second_largest(numbers: []const i32) ?i32 {
+    const max_number: i32 = find_max(numbers);
+    var second_max_number: ?i32 = null;
+    //var numbers_not_max: [5]i32 = undefined;
+    for (numbers) |number| {
+        if (number == max_number) {
+            continue;
+        }
+        if (second_max_number == null or number > second_max_number.?) {
+            // checked for null before safely orelse unwrapping using .?
+            // store it in an array excluding first max number
+            second_max_number = number;
+        }
+    }
+    return second_max_number;
+}
+
 pub fn main() void {
     const numbers = [_]i32{ 5, 12, 7, 12, 3 };
 
@@ -136,7 +152,8 @@ pub fn main() void {
     // const result = find_min(numbers[1..4]);
     // std.debug.print("Minimum number : {d}\n", .{result});
     // const result = find_max_index(numbers[1..4]); // finding max within the given slice and then return its index value of the first maximum
-    const result = count_max_occurrences(numbers[1..4]);
-    std.debug.print("count: {d}\n", .{result});
+    //const result = count_max_occurrences(numbers[1..4]); // find the count of all occurrences of max number
+    const result = second_largest(numbers[0..]);
+    std.debug.print("second largest number: {d}\n", .{result});
 }
 //++++++++++++++++++++++++ NOTE : [_] means “compiler, figure out the array's length by counting the elements.” +++++++++++++++++++//

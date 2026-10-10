@@ -154,6 +154,6 @@ pub fn main() void {
     // const result = find_max_index(numbers[1..4]); // finding max within the given slice and then return its index value of the first maximum
     //const result = count_max_occurrences(numbers[1..4]); // find the count of all occurrences of max number
     const result = second_largest(numbers[0..]);
-    std.debug.print("second largest number: {d}\n", .{result});
+    std.debug.print("second largest number: {?}\n", .{result});
 }
 //++++++++++++++++++++++++ NOTE : [_] means “compiler, figure out the array's length by counting the elements.” +++++++++++++++++++//

@@ -123,21 +123,22 @@ fn count_max_occurrences(numbers: []const i32) usize {
     return count;
 }
 
-fn second_largest(numbers: []const i32) ?i32 {
-    const max_number: i32 = find_max(numbers);
+fn second_largest(numbers: []const i32) struct { ?i32, ?i32 } {
+    var max_number: ?i32 = null;
     var second_max_number: ?i32 = null;
-    //var numbers_not_max: [5]i32 = undefined;
     for (numbers) |number| {
-        if (number == max_number) {
-            continue;
-        }
-        if (second_max_number == null or number > second_max_number.?) {
-            // checked for null before safely orelse unwrapping using .?
-            // store it in an array excluding first max number
-            second_max_number = number;
+        if (max_number == null) {
+            max_number = number;
+        } else if (number > max_number.?) {
+            second_max_number = max_number;
+            max_number = number;
+        } else if (number < max_number.?) {
+            if (second_max_number == null or number > second_max_number.?) {
+                second_max_number = number;
+            }
         }
     }
-    return second_max_number;
+    return .{ second_max_number, max_number };
 }
 
 pub fn main() void {
@@ -154,6 +155,7 @@ pub fn main() void {
     // const result = find_max_index(numbers[1..4]); // finding max within the given slice and then return its index value of the first maximum
     //const result = count_max_occurrences(numbers[1..4]); // find the count of all occurrences of max number
     const result = second_largest(numbers[0..]);
-    std.debug.print("second largest number: {?}\n", .{result});
+    std.debug.print("Second max: {}\n", .{result[0] orelse 0});
+    std.debug.print("Max: {}\n", .{result[1] orelse 0});
 }
 //++++++++++++++++++++++++ NOTE : [_] means “compiler, figure out the array's length by counting the elements.” +++++++++++++++++++//

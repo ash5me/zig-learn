@@ -141,21 +141,59 @@ fn second_largest(numbers: []const i32) struct { ?i32, ?i32 } {
     return .{ second_max_number, max_number };
 }
 
-pub fn main() void {
-    const numbers = [_]i32{ 5, 12, 7, 12, 3 };
+// pub fn main() void {
+//     const numbers = [_]i32{ 5, 12, 7, 12, 3 };
 
-    //print_numbers(numbers[1..4]); // function can accept slice without need to know array's size at comptime. The slices can be different sizes still be accepted by sum()
-    //const result = find_max(numbers[1..4]);
-    // std.debug.print("max : {d}\n", .{result});
-    //
-    // const count = count_positive(numbers[1..5]);
-    //
-    // const result = find_min(numbers[1..4]);
-    // std.debug.print("Minimum number : {d}\n", .{result});
-    // const result = find_max_index(numbers[1..4]); // finding max within the given slice and then return its index value of the first maximum
-    //const result = count_max_occurrences(numbers[1..4]); // find the count of all occurrences of max number
-    const result = second_largest(numbers[0..]);
-    std.debug.print("Second max: {}\n", .{result[0] orelse 0});
-    std.debug.print("Max: {}\n", .{result[1] orelse 0});
+//     //print_numbers(numbers[1..4]); // function can accept slice without need to know array's size at comptime. The slices can be different sizes still be accepted by sum()
+//     //const result = find_max(numbers[1..4]);
+//     // std.debug.print("max : {d}\n", .{result});
+//     //
+//     // const count = count_positive(numbers[1..5]);
+//     //
+//     // const result = find_min(numbers[1..4]);
+//     // std.debug.print("Minimum number : {d}\n", .{result});
+//     // const result = find_max_index(numbers[1..4]); // finding max within the given slice and then return its index value of the first maximum
+//     //const result = count_max_occurrences(numbers[1..4]); // find the count of all occurrences of max number
+//     const result = second_largest(numbers[0..]);
+//     std.debug.print("Second max: {}\n", .{result[0] orelse 0});
+//     std.debug.print("Max: {}\n", .{result[1] orelse 0});
+// }
+
+// ----------------------------------------------------------------------------------------------------------------------- //
+// Write a function that removes an element at a given index while preserving the order of the remaining elements.
+fn removeAt(numbers: []i32, index: usize) []i32 {
+    std.debug.assert(index < numbers.len);
+    var i: usize = index;
+    while (i + 1 < numbers.len) : (i += 1) {
+        numbers[i] = numbers[i + 1];
+    }
+    return numbers[0 .. numbers.len - 1];
+}
+
+fn insertAt(numbers: []i32, length: usize, index: usize, value: i32) usize {
+    std.debug.assert(length < numbers.len);
+    std.debug.assert(index <= length);
+
+    var i = length; // set i value to 3, the first unused slot
+    while (i > index) : (i -= 1) {
+        numbers[i] = numbers[i - 1];
+    }
+
+    numbers[index] = value;
+    return length + 1; // since length is now after adding a value
+}
+
+pub fn main() void {
+    // var numbers = [_]i32{ 10, 20, 30, 40, 50 };
+    // const result = removeAt(numbers[0..], 2); // Valid input 0 to 4, 5 triggers your assertion because index < numbers.len is false
+    // std.debug.print("remaining elements: {any}\n", .{result});
+    var numbers = [_]i32{ 10, 20, 30, 0, 0 };
+
+    const new_length = insertAt(numbers[0..], 3, 1, 99);
+
+    // Take a slice containing only the four valid elements.
+    const result = numbers[0..new_length];
+
+    std.debug.print("Elements: {any}\n", .{result});
 }
 //++++++++++++++++++++++++ NOTE : [_] means “compiler, figure out the array's length by counting the elements.” +++++++++++++++++++//

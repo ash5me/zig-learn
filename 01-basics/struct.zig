@@ -17,15 +17,16 @@ const Player = struct {
             return;
         }
 
-        if (self.health < damage) {
+        if (self.health <= damage) {
             self.health = 0;
+            self.state = PlayerState.dead;
             return;
         }
 
         self.health -= damage;
     }
     fn heal(self: *Player, amount: i32) void {
-        if (amount < 0) {
+        if (self.health <= 0 or amount < 0) {
             return;
         }
         self.health += amount;
@@ -39,6 +40,9 @@ const Player = struct {
         return self.health > 0;
     }
     fn move(self: *Player, dx: f32, dy: f32) void {
+        if (!self.isAlive()) {
+            return;
+        }
         self.x += dx;
         self.y += dy;
         self.state = PlayerState.moving;
@@ -62,7 +66,7 @@ const Player = struct {
 };
 
 pub fn main() void {
-    var player = Player{ .health = 90, .x = 0, .y = 0 };
+    var player = Player{ .health = 30, .x = 0, .y = 0 };
     player.takeDamage(30);
     const player_life = player.isAlive();
     std.debug.print("Player is alive : {any}\n", .{player_life});

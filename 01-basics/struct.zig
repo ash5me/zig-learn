@@ -7,6 +7,16 @@ const PlayerState = enum {
     dead,
 };
 
+const PlayerEvent = union(enum) {
+    damage: i32,
+    heal: i32,
+    movement: struct {
+        dx: f32,
+        dy: f32,
+    },
+    reset,
+};
+
 const Player = struct {
     health: i32,
     x: f32,
@@ -54,7 +64,6 @@ const Player = struct {
         self.state = PlayerState.idle;
     }
     fn getStateMessage(self: *const Player) []const u8 {
-        // Use a switch on self.state
         const player_state = switch (self.state) {
             .idle => "Player is idle",
             .moving => "Player is moving",
@@ -63,20 +72,36 @@ const Player = struct {
         };
         return player_state;
     }
+    fn applyEvent(self: *Player, event: PlayerEvent) void {
+        switch (event) {
+            // Handle each event here
+            .damage => |amount| self.takeDamage(amount),
+            .heal => |amount| self.heal(amount),
+            .movement => |direction| self.move(direction.dx, direction.dy),
+            .reset => self.reset(),
+        }
+    }
 };
 
 pub fn main() void {
-    var player = Player{ .health = 30, .x = 0, .y = 0 };
-    player.takeDamage(30);
+    var player = Player{ .health = 100, .x = 0, .y = 0 };
+    //player.takeDamage(30);
+    player.applyEvent(.{ .damage = 30 });
     const player_life = player.isAlive();
     std.debug.print("Player is alive : {any}\n", .{player_life});
-    player.move(3.5, -2.0);
-    player.heal(60);
+    //player.move(3.5, -2.0);
+    player.applyEvent(.{ .movement = .{
+        .dx = 3.5,
+        .dy = -2.0,
+    } });
+    //player.heal(20);
+    player.applyEvent(.{ .heal = 20 });
     std.debug.print("Player position : {d},{d}\n", .{ player.x, player.y });
     std.debug.print("Remaining health: {d}\n", .{player.health});
     std.debug.print("Player state: {s}\n", .{@tagName(player.state)});
     std.debug.print("{s}\n", .{player.getStateMessage()});
-    player.reset();
+    //player.reset();
+    player.applyEvent(.reset);
     std.debug.print("Player position after reset : {d},{d}\n", .{ player.x, player.y });
     std.debug.print("Remaining health after reset : {d}\n", .{player.health});
 }

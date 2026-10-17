@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "svelte": {
+      "source": "vercel-labs/json-render",
+      "sourceType": "github",
+      "skillPath": "skills/svelte/SKILL.md",
+      "computedHash": "e9353f3eaaf8987483567780e08140735b465942c7d2eeab354e4145d261a8e1"
+    }
+  }
+}

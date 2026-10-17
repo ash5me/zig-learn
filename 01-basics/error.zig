@@ -28,9 +28,15 @@ fn safeMultiply(a: i32, b: i32) MathError!i32 {
     return result[0];
 }
 
+fn calculateExpression(a: i32, b: i32, c: i32) MathError!i32 {
+    const quotient = try safeDivide(a, b);
+
+    return try safeMultiply(quotient, c);
+}
+
 fn calculate() !i32 {
     //const result = try safeDivide(-10, 2);
-    const result = try safeMultiply(-2_000_000_000, 2);
+    const result = try calculateExpression(2_000_000_000, 1, 2);
     return result;
 }
 

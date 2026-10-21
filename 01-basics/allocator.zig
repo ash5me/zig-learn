@@ -117,6 +117,28 @@ test "makeTwoBuffers handles allocation failure" {
     try std.testing.expectError(error.OutOfMemory, makeTwoBuffers(allocator, false)); // don't use try, it exits the test before your expectError runs
 }
 
+test "makeTwoBuffers handles all allocation failures" {
+    try std.testing.checkAllAllocationFailures(
+        std.testing.allocator,
+        testMakeTwoBuffers,
+        .{},
+    );
+}
+
+//+++++++++++++++++++++++++++++ Test helpers +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+fn testMakeTwoBuffers(allocator: Allocator) !void {
+    const buffers = try makeTwoBuffers(allocator, false);
+
+    defer allocator.free(buffers);
+    defer allocator.free(buffers[1]);
+    defer allocator.free(buffers[0]);
+
+    try std.testing.expectEqual(@as(usize, 2), buffers.len);
+    try std.testing.expectEqual(@as(usize, 16), buffers[0].len);
+    try std.testing.expectEqual(@as(usize, 32), buffers[1].len);
+}
+//+++++++++++++++++++++++++++++ Test helpers +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+
 pub fn main() void {
     const buffer = makeBuffer(page_alloc, 16, false) catch {
         std.debug.print("Allocation failed\n", .{});

@@ -20,6 +20,7 @@ fn makeBuffer(
     return buffer;
 }
 
+// positive case
 test "makeBuffer initializes bytes to zero" {
     const allocator = std.testing.allocator;
 
@@ -33,6 +34,7 @@ test "makeBuffer initializes bytes to zero" {
     }
 }
 
+// negative case
 test "makeBuffer cleans up on initialization failure" {
     const allocator = std.testing.allocator;
     // Error message
@@ -68,6 +70,7 @@ fn makeTwoBuffers(
     return combined_slice;
 }
 
+// positive case
 test "makeTwoBuffers initializes bytes to zero" {
     const allocator = std.testing.allocator;
 
@@ -94,9 +97,24 @@ test "makeTwoBuffers initializes bytes to zero" {
     }
 }
 
+// negative case
 test "makeTwoBuffers cleans up on initialization failure" {
     const allocator = std.testing.allocator;
     try std.testing.expectError(error.InitializationFailed, makeTwoBuffers(allocator, true));
+}
+
+// out of memory case
+test "makeTwoBuffers handles allocation failure" {
+    var failing_allocator = std.testing.FailingAllocator.init(
+        std.testing.allocator,
+        .{ .fail_index = 2 },
+    );
+
+    const allocator = failing_allocator.allocator();
+
+    // TODO: call makeTwoBuffers with this allocator
+    // TODO: expect error.OutOfMemory
+    try std.testing.expectError(error.OutOfMemory, makeTwoBuffers(allocator, false)); // don't use try, it exits the test before your expectError runs
 }
 
 pub fn main() void {

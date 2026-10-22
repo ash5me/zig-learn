@@ -41,6 +41,42 @@ test "makeBuffer cleans up on initialization failure" {
     try std.testing.expectError(error.InitializationFailed, makeBuffer(allocator, 16, true));
 }
 
+// encapsulating ownership
+const TwoBuffers = struct {
+    allocator: Allocator,
+    buffers: [][]u8,
+    //init : should own allocation, frees, zero initialization, then transfer ownership to the returned TwoBuffers value
+    fn init(allocator: Allocator) !TwoBuffers {
+        // outer slice
+        const combined_slice: [][]u8 = try allocator.alloc([]u8, 2);
+        errdefer allocator.free(combined_slice);
+
+        // first buffer
+        const buffer = try allocator.alloc(u8, 16);
+        errdefer allocator.free(buffer);
+
+        // second buffer
+        const second_buffer = try allocator.alloc(u8, 32);
+        errdefer allocator.free(second_buffer);
+
+        // zero initialization
+        @memset(buffer, 0);
+        @memset(second_buffer, 0);
+
+        // storing in outer slice
+        combined_slice[0] = buffer;
+        combined_slice[1] = second_buffer;
+
+        return .{ .allocator = allocator, .buffers = combined_slice };
+    }
+    //self: *TwoBuffers parameter gives the method access to the struct's fields
+    fn deinit(self: *TwoBuffers) void {
+        defer self.allocator.free(self.buffers);
+        defer self.allocator.free(self.buffers[1]);
+        defer self.allocator.free(self.buffers[0]);
+    }
+};
+
 fn makeTwoBuffers(
     allocator: Allocator,
     fail: bool,
@@ -125,6 +161,25 @@ test "makeTwoBuffers handles all allocation failures" {
     );
 }
 
+test "TwoBuffers owns and frees its buffers" {
+    const allocator = std.testing.allocator;
+
+    var data = try TwoBuffers.init(allocator);
+    defer data.deinit();
+
+    try std.testing.expectEqual(@as(usize, 2), data.buffers.len);
+    try std.testing.expectEqual(@as(usize, 16), data.buffers[0].len);
+    try std.testing.expectEqual(@as(usize, 32), data.buffers[1].len);
+}
+
+test "TwoBuffers handles allocation failures" {
+    try std.testing.checkAllAllocationFailures(
+        std.testing.allocator,
+        testTwoBuffersInit,
+        .{},
+    );
+}
+
 //+++++++++++++++++++++++++++++ Test helpers +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 fn testMakeTwoBuffers(allocator: Allocator) !void {
     const buffers = try makeTwoBuffers(allocator, false);
@@ -136,6 +191,11 @@ fn testMakeTwoBuffers(allocator: Allocator) !void {
     try std.testing.expectEqual(@as(usize, 2), buffers.len);
     try std.testing.expectEqual(@as(usize, 16), buffers[0].len);
     try std.testing.expectEqual(@as(usize, 32), buffers[1].len);
+}
+
+fn testTwoBuffersInit(allocator: Allocator) !void {
+    var data = try TwoBuffers.init(allocator);
+    defer data.deinit();
 }
 //+++++++++++++++++++++++++++++ Test helpers +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 

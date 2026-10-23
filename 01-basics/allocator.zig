@@ -71,9 +71,19 @@ const TwoBuffers = struct {
     }
     //self: *TwoBuffers parameter gives the method access to the struct's fields
     fn deinit(self: *TwoBuffers) void {
+        if (self.buffers.len == 0) return;
         defer self.allocator.free(self.buffers);
         defer self.allocator.free(self.buffers[1]);
         defer self.allocator.free(self.buffers[0]);
+    }
+    fn take(self: *TwoBuffers) TwoBuffers {
+        const result = TwoBuffers{
+            .allocator = self.allocator,
+            .buffers = self.buffers,
+        };
+        //Clear self.buffers so self no longer owns the allocations.
+        self.buffers = &.{};
+        return result;
     }
 };
 
@@ -180,6 +190,22 @@ test "TwoBuffers handles allocation failures" {
     );
 }
 
+test "TwoBuffers transfers ownership with take" {
+    const allocator = std.testing.allocator;
+
+    var first = try TwoBuffers.init(allocator);
+    defer first.deinit();
+
+    var second = first.take();
+    defer second.deinit();
+
+    try std.testing.expectEqual(@as(usize, 0), first.buffers.len);
+    try std.testing.expectEqual(@as(usize, 2), second.buffers.len);
+
+    try std.testing.expectEqual(@as(usize, 16), second.buffers[0].len);
+    try std.testing.expectEqual(@as(usize, 32), second.buffers[1].len);
+}
+
 //+++++++++++++++++++++++++++++ Test helpers +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 fn testMakeTwoBuffers(allocator: Allocator) !void {
     const buffers = try makeTwoBuffers(allocator, false);
@@ -216,3 +242,9 @@ pub fn main() void {
 
     defer page_alloc.free(second_buffer);
 }
+
+// pub fn main() void {
+//     const allocator = std.testing.allocator;
+//     var first = try TwoBuffers.init(allocator);
+//     var second = first;
+// }

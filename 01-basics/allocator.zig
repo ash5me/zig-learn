@@ -72,9 +72,11 @@ const TwoBuffers = struct {
     //self: *TwoBuffers parameter gives the method access to the struct's fields
     fn deinit(self: *TwoBuffers) void {
         if (self.buffers.len == 0) return;
-        defer self.allocator.free(self.buffers);
-        defer self.allocator.free(self.buffers[1]);
-        defer self.allocator.free(self.buffers[0]);
+        const buffers = self.buffers;
+        defer self.allocator.free(buffers);
+        defer self.allocator.free(buffers[1]);
+        defer self.allocator.free(buffers[0]);
+        self.buffers = &.{};
     }
     fn take(self: *TwoBuffers) TwoBuffers {
         const result = TwoBuffers{

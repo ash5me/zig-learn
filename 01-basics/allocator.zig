@@ -250,3 +250,41 @@ pub fn main() void {
 //     var first = try TwoBuffers.init(allocator);
 //     var second = first;
 // }
+
+// ----------------------------------------------------** ARENA ALLOCATOR **---------------------------------------------------//
+
+test "arena allocates multiple buffers" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+
+    const allocator = arena.allocator();
+
+    const first = try allocator.alloc(u8, 16);
+    const second = try allocator.alloc(u8, 32);
+    const third = try allocator.alloc(u8, 64);
+
+    @memset(first, 1);
+    @memset(second, 2);
+    @memset(third, 3);
+
+    try std.testing.expectEqual(@as(usize, 16), first.len);
+    try std.testing.expectEqual(@as(usize, 32), second.len);
+    try std.testing.expectEqual(@as(usize, 64), third.len);
+}
+
+test "arena allocator reset" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+
+    const allocator = arena.allocator();
+
+    const first = try allocator.alloc(u8, 16);
+    @memset(first, 1);
+
+    const reset_succeeded = arena.reset(.free_all);
+    try std.testing.expect(reset_succeeded);
+
+    const second = try allocator.alloc(u8, 32);
+
+    try std.testing.expectEqual(@as(usize, 32), second.len);
+}

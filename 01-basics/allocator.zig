@@ -20,6 +20,11 @@ fn makeBuffer(
     return buffer;
 }
 
+const Example = struct {
+    a: u8,
+    b: u32,
+};
+
 // positive case
 test "makeBuffer initializes bytes to zero" {
     const allocator = std.testing.allocator;
@@ -287,4 +292,23 @@ test "arena allocator reset" {
     const second = try allocator.alloc(u8, 32);
 
     try std.testing.expectEqual(@as(usize, 32), second.len);
+}
+
+test "inspect type sizes and alignment" {
+    try std.testing.expect(@sizeOf(u8) == 1);
+
+    std.debug.print(
+        "u8: size={}, alignment={}\n",
+        .{ @sizeOf(u8), @alignOf(u8) },
+    );
+
+    std.debug.print(
+        "u32: size={}, alignment={}\n",
+        .{ @sizeOf(u32), @alignOf(u32) },
+    );
+
+    std.debug.print(
+        "Example: size={}, alignment={}\n",
+        .{ @sizeOf(Example), @alignOf(Example) },
+    );
 }

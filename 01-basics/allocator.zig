@@ -1,5 +1,4 @@
 const std = @import("std");
-
 const Allocator = std.mem.Allocator;
 const page_alloc = std.heap.page_allocator;
 
@@ -22,6 +21,12 @@ fn makeBuffer(
 
 const Example = struct {
     a: u8,
+    b: u32,
+};
+
+const LayoutExample = struct {
+    a: u8,
+    c: u8,
     b: u32,
 };
 
@@ -251,9 +256,8 @@ pub fn main() void {
 }
 
 // pub fn main() void {
-//     const allocator = std.testing.allocator;
-//     var first = try TwoBuffers.init(allocator);
-//     var second = first;
+//     var items: [3]Example = undefined;
+//     const ptr: [*]Example = &items;
 // }
 
 // ----------------------------------------------------** ARENA ALLOCATOR **---------------------------------------------------//
@@ -311,4 +315,60 @@ test "inspect type sizes and alignment" {
         "Example: size={}, alignment={}\n",
         .{ @sizeOf(Example), @alignOf(Example) },
     );
+}
+
+// {Address of element } i = {Base address} + i times {size of element}
+// For a properly aligned array, the element size is a multiple of the element alignment.
+
+// test "array alignment" {
+//     const items: [3]Example = undefined;
+
+//     std.debug.print(
+//         "Element size: {}\n",
+//         .{@sizeOf(Example)},
+//     );
+
+//     std.debug.print(
+//         "Element alignment: {}\n",
+//         .{@alignOf(Example)},
+//     );
+
+//     std.debug.print(
+//         "Array size: {}\n",
+//         .{@sizeOf(@TypeOf(items))},
+//     );
+
+//     std.debug.print(
+//         "Array alignment: {}\n",
+//         .{@alignOf(@TypeOf(items))},
+//     );
+// }
+
+// {Address}({ptr}+n) = {Address}({ptr})+n times operatorname{sizeof}(T)
+
+test "inspect struct memory layout" {
+    std.debug.print("Size: {}\n", .{@sizeOf(LayoutExample)});
+    std.debug.print("Alignment: {}\n", .{@alignOf(LayoutExample)});
+
+    std.debug.print("Offset of a: {}\n", .{@offsetOf(LayoutExample, "a")});
+    std.debug.print("Offset of b: {}\n", .{@offsetOf(LayoutExample, "b")});
+    std.debug.print("Offset of c: {}\n", .{@offsetOf(LayoutExample, "c")});
+}
+
+test "allocator.create automatic space and alignment allocation" {
+    const allocator = std.testing.allocator;
+    const ptr = try allocator.create(LayoutExample);
+    const result = @intFromPtr(ptr) % @alignOf(LayoutExample);
+    try std.testing.expectEqual(@as(usize, 0), result);
+    std.debug.print("Address : {}\n", .{result});
+    defer allocator.destroy(ptr);
+}
+
+test "allocator.create automatic allocation of an array of fixed size" {
+    const allocator = std.testing.allocator;
+    const items = try allocator.alloc(LayoutExample, 10);
+    const result = @intFromPtr(items.ptr) % @alignOf(LayoutExample);
+    try std.testing.expectEqual(@as(usize, 0), result);
+    try std.testing.expectEqual(@as(usize, 10), items.len); // check no. of elements
+    defer allocator.free(items);
 }
